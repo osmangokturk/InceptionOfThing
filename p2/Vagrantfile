@@ -1,0 +1,17 @@
+Vagrant.configure("2") do |config|
+  config.vm.box = "generic/centos8"
+  config.vm.box_check_update = false   
+ 
+  config.vm.define "vmasseS" do |server|
+	server.vm.hostname = "vmasseS"
+	server.vm.network :private_network, ip: "192.168.56.110"
+	server.vm.synced_folder ".", "/vagrant", disabled: false
+	server.vm.provider "virtualbox" do |v|
+		v.name = "vmasseS"
+	     	v.gui = false
+	     	v.memory = "2048"
+	     	v.cpus = 2
+		end
+	server.vm.provision "shell", privileged: true, path: "server.sh"
+	end
+end
