@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/exercises-projets-pedagogiques/ldervode_IoT.git
+    repoURL: https://github.com/osmangokturk/manifestForIncOTProject.git
     targetRevision: HEAD
     path: .
   destination:
