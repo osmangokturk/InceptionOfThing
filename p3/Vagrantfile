@@ -1,0 +1,23 @@
+
+Vagrant.configure("2") do |config|
+  LOGIN = "ogokturk"
+  IPS   = "192.168.56.110"
+  BOX   = "bento/debian-13.0"
+
+  config.vm.box = "#{BOX}"
+  config.vm.hostname = "#{LOGIN}-p3"
+  config.vm.network "private_network", ip: "#{IPS}"
+  config.ssh.insert_key = false
+  config.ssh.forward_agent = true
+  config.vm.synced_folder "./confs", "/vagrant/confs"
+
+
+  config.vm.provider "virtualbox" do |vb|
+    vb.name = "serverp3"
+    vb.memory = 8192
+    vb.cpus = 4
+  end
+
+  config.vm.provision "shell", path: "scripts/install_k3d.sh"
+  config.vm.provision "shell", path: "scripts/install_argocd.sh"
+end

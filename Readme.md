@@ -1,65 +1,149 @@
+
+# Inception of Things 
+
+## A short summary
+
+ Cratiıng kubernetes wia K3s where we can host various applications in different replicas via a single Domain.  Vagrant is used to create virtual boxes.
+
+ if you are curious about K3s, kubectl, kubeadm, kubelet, joining two computers, os file vs box file,  ..
+  Read my long stuy notes below for the project.
+
+
 ## What is Vagrant, and what are the other  similar tools in the market
-A tool to create VM. It can works both on windows and Linux machines. The similar product on the 
+Vagrant is a tool to create VM. It can works both on windows and Linux machines. The similar product on the market is terraform, 
 
 we can install vagrant on winodwss too. Amd64  is for 64 bit OS like Windows 11. 
 
-Control pnel, turn windows features on or off means  customizing the windows programs  for you. 
+For w'ndows dont forget to turn windows features on or off in the " Control panel" menu, which means  customizing the windows programs. 
 
-## First basic commands.  
-vagrant comands works in the Pwershell or cmd once they  vagrant is installed on the windows.  
--vagrant init <boxname> will add the image to vagrantfile. 
-vagrant up will create the virtual machine itself. 
+## First basic commands for Vagrant.  
+vagrant comands works in the Pwershell or cmd once the  vagrant is installed on the windows.  Normally "vagrant init <boxname> will add the image to vagrantfile and "vagrant up" will create the virtual machine from the prefered virtualization platform like Virtual Box.  
 
 
-#Vagrant file is in Ruby language.
-while ansible uses jinja2 template for variable expansion, docker-compose use a yaml file and uses docker variable substition, 
-vagrant is a Ruby script, hence it has its own keywords, functions, 
 
-vagrand ssh <machineName> will try to make an ssh connection. 
-in the project it isrequired to be with no pasword. This is done through RSA key setuo. 
+
+Cagrant is a tool, therefore it has many capabilities with which it comes. For example,  it will handle ssh key generation and placsing in necessary location both for the client (where vagrant is installed and working) to the targets (where they are being created).  For example "vagrant ssh <machineName> will try to make an ssh connection. As in the project it isrequired that ssh  be with no pasword, this is the exactly this pattern, no need to wory about ssh keys externally. 
+
+<vagrant box list> will list  vms and the privder (like virtualbox or vmware) as well as their versions. like 
+![alt text](image-1.png)
+
+<vagrant destroy> will destroy and delete the resources related to the instance, <vagrant box remove mySpecificbıx> remove the template, box.
+so after vagrant destroy we can invoke vagrant box remove myBox, but not vice versa.
+
+vagrant status will show the machines  states, whether they are running or not. 
+
 
 #### Host vs Vagrand Vm ?
 ![alt text](image-1.png)
 
-## Vagrant file: the Basic elements:
-There is no such thing as preconfigured vm box. There are more simple boxex and more prepared boxes like Kali Linux.  4
 
--
+
+## Vagrantfile: the basic elements:
+ Vagrant file is in  Ruby language. Hence vagrant is a Ruby script, hence it has its own keywords, functions, variable expansion. Recall that ansible uses jinja2 template for variable expansion, docker-compose use a yaml file and uses docker variable substition.
+
 
 ### iso file  vs box file
-Remember your first vm box createion effort with VBox application. Then comes manual or graphical installation where you choose a language, user, hostname and paswords and partitioned disk. 
+Remember your first vm box createion effort with VBox application.In the manual or graphical installation, you choose a language, user, hostname and paswords and partitioned disk. 
 
--RAM, Storage, CPU these elements can be add to the box later. 
--You have to select a iso file. then A box is a started completed, configured  
--Language is kind of OS version dependent. some allow  change of language later. 
+-RAM, Storage, CPU these elements can be added to the box later. 
+-You have to select a iso file. then a box is  started completed, configured  
+-Language choice like English or French is a bit OS dependent. Some  versions allow  change of language later. For some OS, ,t ,s hard to change later. 
 -One can cretae his own box and then create his own reusable box via "vagrant package" to create a box file.  Later  "vagrant box add" and later be references as "config.vm.bkx ="my-custom-box".  Created boxes are stored in the main host  under "~/.vagrand.d/boxes" for Linux and MAcOS.
--by nature any iso file is mostly only readeable to everybody, unless you want to make it to yours r--r--r--. While,  a box file is mutable, so the owner has write permission, like rw_--- ---. 
+-by nature any iso file is mostly only readeable to everybody, unless you want to make it to yours r--r--r--. While,  a box file is mutable, so the owner has write permission, like rw_--- ---.
+
+There is no such thing as preconfigured vm box. There are more simple boxex and more prepared boxes like Kali Linux.  
+
 
 ### OS image vs Kernel version
 
 -OS image is the general OS like Windows 11 or Ubuntu 22.04 or Debian 12 or Centos Linux8
 Whereas the Kernel Version is the internal build number (major, minor, ...). for windows  it is typically like 
 [Version 10.0.26100.6725]
-which correspond to maor/minor buildn no (26100) and version (6725)
+which correspond to major/minor buildin no (26100) and version (6725)
 ![alt text](image.png)
 
-after tuesday or monthy   updates, foe windows only the version wnumber might change. for major chnages (roughly once a year) the build number w
-ill change. 
+after tuesday or monthly   updates, foe windows only the version wnumber might change. for major chnages (roughly once a year) the build number will change. 
 
 # k3s vs k8s vs k3d // kubectl kubeadm kubelet
-k8s is the large scale  kubernetse , k3s is for restricted resources. 
+While k8s is the large scale  kubernetse , k3s is for restricted resources. 
 
-#kubeadm, kubectl, kubelet
+## Token generation and share
+Toekn can be generated in various way. 
+
+We create a token which takes the first 6 digits of the timestamps which will not change in a year. We also impose a check if token exists ti wont re-create the token. Infact, this wont bother, as the newly created token is put int hte shared folder so that the worker node will also use the node. 
+
+## Installation of k3s
+ ### installetion script:
+ https://get.k3s.io site is a comprhensive script.sh file. There is an example to  populate the INSTAL?K3S_EXEC variable. 
+
+-for cmd in kubectl, crictl ctr,, do something. 
+-no reference to kubeadm. 
+no reference to join command
+
+-k3s.yml file is only put in shared foldr on server and s"sed -i"  in the server node. 
+
+### INSTAL_K3S_EXEC variable 
+This is the variable in the script to be downloaded from the k3s.io site.  The variable is populated and the scriptis executed via  "sh" command.  the hyphen after sh is not mandatory but ensure the command will execute the argument frım stdin.
+
+### k3s-config file (former /etc/rancher/k3s/k3s.yaml ) KUBECONFIG file
+in the k3s context, we get the script on  https://get.k3s.io/
+we populate the variable INSTALL_K3S_EXEC  .
+ and we run this script. Probably there are many sub shell /processes being executed. 
+ 
+a file is creat at "/etc/rancher/k3s/k3s.yaml"  which execution have created this file?
+
+so the file is what is generally known as KUBECONFIG file that is being created  dynamically ( reflecting the current environmn variables) 
+![alt text](image-2.png)
+![alt text](image-3.png)
+![alt text](image-4.png)
+
+However, on the agent side, there is no such files like /etc/rancher/k3s/k3sbeing created.  
+
+
+## Joining two computer
+
+In kubernets architecure there is joining of nodes. However for k3s the join function is done via  k3s installation automatically. 
+It may the first time you have heard of the term "joining two computeters". Indeed  with K3s we join two computrs  in a subordinate relationship. The one who acept based on the token is the Serer or Master, or Control panel,  while the one that is provided with token to authenticate itself to the Master node. 
+
+REcall that the containerization  was a kind of nested or recursive comuters, while joining computers means  creation a subordinate relationship between compıters. If you like analogies like me, it is like the  conductor and the musician in a concert. the  musician can join if he has the token of concuctor .
+
+
+ ## Scalling out and High Availability (HA)
+  one can increase the number of worker nodes  as well incrase the master nodes. incrasing the number of workers measn adding muscle to the  cluster wihc it implies it can handle more operations.  this is called scalling out .But one can increase the master nodes toos. This si for redundancy or resilience purpose. This is called high Availabilirty (HA). 
+
+  * Do each Contol plane adn worker nodes communicate and see each other among themselves?
+  Yes. Indeed this is the core of this  kubernetes concept. 
+
+  MAster <--> Master:
+  Both Master nodes join each other as the initial mutual authentication. They are connected to each other to agree on the state (which replica is the one to register the data....) This is called peer-to-peer connection and is mainly concerning the "disributed databases" like etcd or external databases like PosgresSQL.  
+  -They see each other via 
+
+  Server->Worker :
+  Woerker node use the API token to join the cluster.  
+  The conncection is don via kubelt   via using HTTPS/TLS  to the Control panel (API Server). Worker  communicate to  Server to present its health status. Server talk to Worker to  tell which pod should run stop or manage. 
+  Server and Worker see each toher via API Server.
+
+
+  Pods<-->pods : or inter aplications:
+  This kind of the heart of the topic. The network overla( CNI-Container Network Interface- Flannel)  help conncetion and visiblity.  This connection is also made to the master nodes. 
+
+  A table of sumary:
+  ![alt text](image.png)
+
+
+## kubeadm, kubectl, kubelet
  all three serves different distinc roles. 
- kubectl is like the cli tool for the kubernetes, it is in the local machine .
+ kubectl is like the cli tool for the kubernetes, it is in the local machine as well as the control plane.
 
  Kubeadm reside in control plane (alos on the nodes during the join) 
 
- kubelet is the system dameon where it resides on nodes (both contraol pane and worker nodes ). it ihas no comands. 
+ kubelet is the system dameon where it resides on nodes (both contraol pane and worker nodes ). it ihas no comands in cli.
 
  In a typical Laptop as the local or admin  machine, the serverA as the control plane and the serverB as the worker node,  kubectl is typically installed on both local machine and control plane, optioanlay on the worker node. 
  The kubeadm is installed both on the  control plane (ServerA ) and the worker node (ServerB) . On the Control plane it init it. on the worker node it will join (register )  worker  to the control plane. 
  The kubelet  is also intalled both on contral plane and worker node that each worker node register itsel  with to control palen and  containers are run .  
+
+
  ## kubectl vs k3s
  -k3s is a kind of bundle for kubeadm +kubelet+containerd. İt is not an alternative to the kubectl. so one need to install kubectl to manage the cluster. while k3s run the cluster, kubectl manage the cluster. 
 
@@ -83,9 +167,28 @@ Context information.
 
 # Rancher labs develop  k3s 
 
-#provider is teh VM creating sorftware, provisioner is the toold the setup like a sheşş script, an ansible, a pubper.    
+ ## VM craetions in vagrant.
 
-# P1 : Preparation and installations
+provider is teh VM creating sorftware ( like virtualbox or vmware).  
+
+Provisioner is the script the VM is going to  be created having this.   depending on the provisioner type we can guess what kind of actions are done. shell provisioner means somme command or scripts are executed.  A A file prowisioner  means there is coopy prcess. Ansible provisioner means some playbooks are going to be executed. 
+
+#### define & hostname & prvovider.name & user
+
+defin intoruces the node identifier. "vagrant up myNode". if the node is not  passed here it wil create tall nodes .
+
+hostname is for the user name in the guest OS. it is important for networking purpıses. 
+
+provider.name is the  name of the VM to be seen on the provider (virtualbox).
+
+user/login:
+generally it is the "vagrant". If one change the  username, the ssh cofnigurations need to be done accordingly. 
+
+
+
+# P1 :
+
+## Preparation and installations
 -We are supposed to work from a virtual machine as the campus workstations are not allowed to install everything. 
 
 -we are required to create two machines: myLoginS  to serve as contral plane, and the second machıne myLoginSW, the worker server  to serve as the worker node. 
@@ -130,6 +233,8 @@ Authentication is first done during the join, by worker nodes.
  ### 1-Token Management
  Tokens are needed for initial authentication. later the certificates will be exchanged.   Hoewer sometimes the pre-shared certicates can be used (like Artam's appraoch, He ues a yaml file and mention certificates there). 
  Sometimes Token can be put in to .env files , or be hardcoded .
+
+ we are going to 
 
  ### 2- OS & Provisioning
 
@@ -234,15 +339,20 @@ the command "vagrant up" basicly do two functionalties. if the VM boxes are not 
 
 *if vagrantfile is modified, "vagrant reload" is better. 
 
+ ##### fodler strucutre on the  control node
+ file folder structure in both machine. kubectl is on the both  machine but config exist only on the  Controla panel, hence it can show  nodes, or pods (currently no pods).
 
-
-
+![alt text](image-13.png)
  
-# P2 Project requirements and Learning Sucets
- 
- ## A -Projrvy Requirements: 
+# P2
+ in p2 projects, the goal is to create the cluster on a single machine, to deploy 3 different application with different replica sets. Ingress will do the routing. 
+
+## Project requirements and Learning Sucets
+
+ ## A -Project Requirements:
+
  ### 1- Only one virtual machine
- -basic of k3s means the kubernets.
+ -basic of k3s means the kubernets. This  means no token generation, hence tno need to pass token to the INSTAL?K3S_EXEC variable .
  All three applications will be accessible via onle one IP address
 
  ### 2- control plane + worker node together. 
@@ -250,20 +360,21 @@ the command "vagrant up" basicly do two functionalties. if the VM boxes are not 
 
  ### 3 - Three web application
 
- It seems the subject ask us to create thre web application simpl for the sake of leearning  deployeng three different  deplomners in the same environment/server  with the help of  K3s.  these applications could have a common task to do, but for this project it is not the case. if it were the case that they are ding a common job, the containers will communicate each other via  ,nternal DNS addrss. 
+ It seems the subject ask us to create thre web applications simpl for the sake of leearning  deployeng three different  deplomners in the same environment/server  with the help of  K3s.  these applications could have a common task to do, but for this project it is not the case. if it were the case that they are ding a common job, the containers will communicate each other via  ,nternal DNS addrss. 
 
  only one IP addrss will serve three wep application with the help of ingress controller. 
+
 
  ### 4- APP2 HAS TO HAVE 3 REPLİCAS
 
  ### 5- Ingress bases resolution 
- İngress helğs to serve the choice based on the browser request. 
+ İngress helps to serve the choice based on the browser request. 
 
 
 
 ## B -Proejct Manifest and their explainations .
 
-Vagrant file and  hardware and provisionings:   centos8 image  that will use a private network, hafrom a shared folder ,  to will run a script for provisoning. 
+Vagrant file and  hardware and provisionings:   centos9s image  that will use a private network, hafrom a shared folder ,  to will run a script for provisoning. 
 
  ### script for provisioning the VM
  we are going to have only one VM. for the school campuse it will be a VM inside a VM. 
@@ -273,7 +384,7 @@ Vagrant file and  hardware and provisionings:   centos8 image  that will use a p
 
 ## B0- Preparation of the Box, Vagrantfile. 
 
- ## B1- Deployents
+ ## B1- Deployments
  all three uses port 8080, bas they will not conflict. 
  handle security issue to avoid problems. 
  get k3s and execute it. 
@@ -293,17 +404,138 @@ template
 one file with 3 rules that use prefix pathType. 
 the port is 80
 
+
+
 ## B3-Services
 three services  the define protocol type target and  port (source port)
 
 ### C Project Run
 vagrant up : 
+one VM will be created that will run server.sh to install k3s and  and created  pods, services and the ingress. 
+
+### Testing the applications. 
+-for Windows modify etc/hosts to  be ble to match the IP to the applicaiton  via 
+notepad C:\Windows\System32\drivers\etc\hosts
+
+on the modenr browsers like chrome,  http://IP version , which will show the app3.com is working. for the testing http://app1.com it always redirect to the https versison, whch is an publicirty address on the go dady. 
+
+-vagrant ssh will enter you to the cluster.  from here 
+curl 'http://192.168.56.110/' -H 'Host: app1.com'   w,ll bring the result. 
+
+#### Difference between LoadBalanceer and Ingress
+Ingress is a layer 7 application and uses protocols like HTTP, while LoadBalancer is a L3  and uses TCP protocols. 
+
+### Port-wise analyssi. 
+
+container <> pod <> service <> ingress
+service is cluster level and need to contain two ports one to  communicate to pos/containers the other is tits own  port for external or ingress. 
+ingress define on port to communicate with service, but it will  listen from outside direcly via controller. 
+
+There is no port speficiation for pod. it will inherit tge saem network namespace from container. if there are mulitple contianer in a single pod, they will shre it. 
+
+
+## P2 Extensions & Limitations
+AS it is difficult to block redirection on modern brosers like Chrome or Firefox, pe can define apps' host name as app1x1.com iinstead of app1.com where browser find a redirection and gooes tho that site. 
+
+currently  App1 is the nginxdemo/hello:plain-text image where it display  server addrss, name, as well as the request ID.  app2: hashicorps/hppt-echo:latest image and app3 :  same httecho.  The text to display is modified. 
+
+How to overcome Brovser https redirection? 
 
 # P3
 
-## Project Requirement
+## Project Requirements
+
+Containerize tek3s--> k3d && CD with ARgo CD.
+
+
+
+### K3S vs. K3D
+
+K3S: Lightweight Kubernetes distribution.
+
+K3D: Runs K3S clusters inside Docker containers for simplicity and speed. 
+How can conteinerizde   k3s are simplier and faster? 
+  ##### Problem of architecture arm64 vs amd64 ? 
+  we are using VirtualBox which host a debian VM which install K3d.... Do we still have to wory about windows compatibility for k3d or k3s ?
+
+  ![alt text](image-14.png)
+
+### No need for vagrant, manual VM
+because  vagrant is resource consuming, because k3s will create containers? 
+
+Why there are no ingress.yml file? 
+because  there is only one application, we simply do the port-forwarding. 
+
+### Argo CD
+a server: 
+is argo CD a cli tool or a web application?
+both. 
+
+a server that has both cli and  web interface. 
+
+ ArgoCd  is a server an run my VM,  it has a Web gui as well. its job is to sync between external source and the internal  artefacts. But I cant communicate back to repo , this will be against the security. 
+
+### Github Actions/Gitlab CI && Argo CD
+
+they serve different purposes. while Github Actions and GitlabCI create artefacts and test tgem, Argo CD   deeploy to the cluster. 
+
+![alt text](image-5.png)
+
+#### Deployment and Service files on the Repo. 
+ Deployment files need tto contain replicas infor and spec.dontainers. information which refer to image (located on the Dockerhub) and containerPort.
+
+ as expected this file is supposed to be on the github repo that can serve as single source of truth.
+
+ Service file is the one that will define the namespace and selector so that it will match to the deployment.  
+
+Replica SEt --> Deployment --> Pod
+Actually you can crate a pod with a pod manifest.  But you cant modify the replica set info and as it miss a Deployment file, when the pod is died, kubernetes wont re create it as ther is no deplymnet. 
+
+Service is only good to have a stable DNS and IP.
+
+##### ports revised.
+The ports infos for  containers is not necessary to be defined in Deployments. it is just for bisual easiness.  The service side can define the container part, which is the targetPort section. 
+
+![port notions ](image-11.png)
+
+for service: the ports field can have multiple sub fields . the port is the  
+
+ #### Application 
+ it is the Custom Resource Definition defined in the  large raw file.  The large file on the argocD project repo plus our specific file will configure the argocd server(sercive) that it will control the pods in the cluser.  
+
+ think of argocd server as the  one that is constantl runnign "kubectl apply -f )
+
+ the service part is 
+
+ Kubernetes and Cluster are not same thing:
+ kubernetes and cluster are not necessarly the same. kubernetes is part of the cluster.  then who creates cluster? the concept of cluster is not that hard defined. if there are tow nodes and you install k3s on both of them with some configurations they form a cluster (P1).  you can install k3s in a single VM that will create various pods, still the notion of cluster is there.  
+
+Kluster  is differernt than kubernetes.  kubernetes is the kubectl that allow to see or monitor or control pods.  so we can add extra things like argo cd into kluster, hence Argo CD is part of the cluster but not part of the kubernetes.
+
+
+
+as the K3d is the containerizded  cluster, şt adds another layer , this help understand better. 
+![alt text](image-6.png)
+
+
+##### node pod container. 
+while node is more similar to a physicial computer machine,  pod is more abstract concept for containers.  when tehrere  3 replicas, 3 pods are created which are containers individually. 
+
+pods are logical host for containers. each pod has its own network namespace (same IP, can talk via localhost). in an advanced case scenario, a pod can host multi containers. then they can talk via localhost. 
+
+In K3d case, there are actually two layer of Docker. the one that emulate (mimic)  physical machines, nodes, and an inner container that run a specific applicaiton (the business logic). 
+![alt text](image-7.png)
+
+![alt text](image-8.png)
+![alt text](image-9.png)
+![alt text](image-10.png)
+
+Question: so here cluster is created in the container right? Why we here use k3d? why we need to create nodes inside the docker (1st level)? generally speaking, a container is a kind of minimalist computer. if we create a container inside this container it becomes what? 
+
+ ##### Servide 
 
 
 
 
-
+# Bonus
+ ## Project Requiremenets: 

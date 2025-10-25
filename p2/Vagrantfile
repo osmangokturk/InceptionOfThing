@@ -1,17 +1,23 @@
+
 Vagrant.configure("2") do |config|
-  config.vm.box = "generic/centos8"
-  config.vm.box_check_update = false   
- 
-  config.vm.define "vmasseS" do |server|
-	server.vm.hostname = "vmasseS"
-	server.vm.network :private_network, ip: "192.168.56.110"
-	server.vm.synced_folder ".", "/vagrant", disabled: false
-	server.vm.provider "virtualbox" do |v|
-		v.name = "vmasseS"
-	     	v.gui = false
-	     	v.memory = "2048"
-	     	v.cpus = 2
-		end
-	server.vm.provision "shell", privileged: true, path: "server.sh"
-	end
+  LOGIN = "ogokturk"
+  IPS   = "192.168.56.110"
+  BOX   = "bento/debian-13.0"
+
+  config.vm.box = "#{BOX}"
+  config.vm.hostname = "#{LOGIN}S"
+  config.vm.network "private_network", ip: "#{IPS}"
+  config.ssh.insert_key = false
+  config.vm.synced_folder ".", "/vagrant"
+
+  config.vm.provider "virtualbox" do |vb|
+    vb.name = "serverp2"
+    vb.memory = 4096
+    vb.cpus = 2
+  end
+
+  config.vm.provision "shell", path: "./scripts/common.sh"
+  config.vm.provision "shell", path: "./scripts/install_k3s_server.sh",
+    args: ["#{IPS}"]
+  config.vm.provision "shell", path: "scripts/apply_manifests.sh"
 end
